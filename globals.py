@@ -11,6 +11,10 @@ SIZE = WIDTH, HEIGHT = 25 * 32, 14 * 32
 COLOR = pygame.color.THECOLORS
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
-fps = 120
+FPS = 60
 
-GRAVITY = 20
+GRAVITY = 0.35
+
+FONT = {
+    'scene': pygame.font.SysFont('monospace', 64)
+}
