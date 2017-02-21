@@ -1,46 +1,40 @@
 import pygame
 
 
-class Board(pygame.sprite.Sprite):
-    def __init__(self, size):
-        super().__init__()
-        self.image = pygame.Surface(size)
-        self.image.fill((13, 13, 13))
-        self.image.set_colorkey((13, 13, 13))
-        self.rect = self.image.get_rect()
-        self.font = pygame.font.SysFont("monospace", 18)
+class Text(pygame.sprite.Sprite):
 
-    def add(self, letter, pos):
-        s = self.font.render(letter, 1, (255, 255, 0))
-        self.image.blit(s, pos)
+    def __init__(self, text, pos, font=pygame.font.SysFont('Arial', 64), color=pygame.Color('white'), anchor='topleft'):
+        super(Text, self).__init__()
+        self.image = font.render(text, False, color)
+        self.image.set_alpha(0)
+        self.rect = self.image.get_rect(**{anchor: pos})
 
 
-class Cursor(pygame.sprite.Sprite):
-    def __init__(self, board):
-        super().__init__()
-        self.image = pygame.Surface((10, 20))
-        self.image.fill((0, 255, 0))
-        self.text_height = 17
-        self.text_width = 10
-        self.rect = self.image.get_rect(topleft=(self.text_width, self.text_height))
-        self.board = board
-        self.text = []
-        self.cooldown = 0
-        self.cooldowns = {'.': 6, '[': 9, ']': 9, ' ': 3, '\n': 15}
+class FadingText(Text):
 
-    def write(self, text):
-        self.text = list(text)
+    def __init__(self, fade_in, wait, fade_out, **kwargs):
+        super(FadingText, self).__init__(**kwargs)
+        self.fade_in = fade_in * 1000
+        self.time_in = fade_in * 1000
+        self.wait = wait * 1000
+        self.time_wait = wait * 1000
+        self.fade_out = fade_out * 1000
+        self.time_out = fade_out * 1000
+
+        self.alpha = 255
+        self.time_since_last = pygame.time.get_ticks()
 
     def update(self):
-        if not self.cooldown and self.text:
-            letter = self.text.pop(0)
-            if letter == '\n':
-                self.rect.move_ip((0, self.text_height))
-                self.rect.x = self.text_width
-            else:
-                self.board.add(letter, self.rect.topleft)
-                self.rect.move_ip((self.text_width, 0))
-            self.cooldown = self.cooldowns.get(letter, 8)
+        dt = pygame.time.get_ticks() - self.time_since_last
+        self.time_since_last = pygame.time.get_ticks()
 
-        if self.cooldown:
-            self.cooldown -= 1
+        if self.time_in > 0:
+            self.time_in -= dt
+            self.image.set_alpha(255 - 255 * self.time_in / self.fade_in)
+        elif self.time_wait > 0:
+            self.time_wait -= dt
+        elif self.time_out > 0:
+            self.time_out -= dt
+            self.image.set_alpha(255 * self.time_out / self.fade_out)
+        else:
+            self.kill()
