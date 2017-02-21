@@ -3,6 +3,7 @@ from globals import COLOR, GRAVITY
 
 
 actor = pygame.sprite.GroupSingle()
+all_sprites = pygame.sprite.Group()
 
 
 class Actor(pygame.sprite.Sprite):
@@ -13,8 +14,8 @@ class Actor(pygame.sprite.Sprite):
         self.image = pygame.Surface((32, 64))
         self.image.fill(COLOR['red'])
 
-        self.speed = 200
-        self.jump_speed = 500
+        self.speed = 4
+        self.jump_speed = 8
         self.position = pygame.math.Vector2(pos)
         self.velocity = pygame.math.Vector2(0, 0)
         self.acceleration = pygame.math.Vector2(0, GRAVITY)
@@ -25,7 +26,7 @@ class Actor(pygame.sprite.Sprite):
         self.collidables = collidables
         self.previous_key = pygame.key.get_pressed()
 
-    def update(self, dt):
+    def update(self):
         key = pygame.key.get_pressed()
 
         # Move left and right.
@@ -47,7 +48,7 @@ class Actor(pygame.sprite.Sprite):
         # Update position.
         last = self.rect.copy()
         self.velocity += self.acceleration
-        self.position += self.velocity * dt
+        self.position += self.velocity
         self.rect.topleft = self.position
         new = self.rect
 
